@@ -12,7 +12,10 @@ func main() {
 		//fm := filemanager.New("prices.txt", fmt.Sprintf("result_%.0f.json", taxRate*100))
 		cmdm := cmdmanager.New()
 		priceJobs := prices.NewTaxIncludedPriceJob(cmdm, taxRate)
-		priceJobs.Process()
+		err := priceJobs.Process()
+		if err != nil {
+			panic(err)
+		}
 
 	}
 }

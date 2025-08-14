@@ -20,8 +20,11 @@ func NewTaxIncludedPriceJob(io interfaces.IOManagerInt, taxRate float64) *TaxInc
 	}
 }
 
-func (job *TaxIncludedPriceJob) Process() {
-	job.LoadData()
+func (job *TaxIncludedPriceJob) Process() error {
+	err := job.LoadData()
+	if err != nil {
+		return err
+	}
 	result := make(map[string]string)
 	for _, price := range job.InputPrices {
 		taxIncludedPrice := price * (1 + job.TaxRate)
@@ -42,17 +45,14 @@ func (job *TaxIncludedPriceJob) Process() {
 	fmt.Println("✅ Calculation complete!")
 	fmt.Println("**************************************")
 	job.TaxIncludedPrices = result
-	err := job.IOManager.WriteResult(job)
-	if err != nil {
-		panic(err)
-	}
+	return job.IOManager.WriteResult(job)
 }
 
-func (job *TaxIncludedPriceJob) LoadData() {
+func (job *TaxIncludedPriceJob) LoadData() error {
 	lines, err := job.IOManager.ReadLines()
 	if err != nil {
 		fmt.Println(err)
-		return
+		return err
 	}
 
 	prices, err := conversion.StringToFloat(lines)
@@ -60,9 +60,10 @@ func (job *TaxIncludedPriceJob) LoadData() {
 		fmt.Println("Error parsing file: ", err)
 		if err != nil {
 			fmt.Println("Error closing file: ", err)
-			return
+			return err
 		}
-		return
+		return err
 	}
 	job.InputPrices = prices
+	return nil
 }
